@@ -28,23 +28,36 @@ public class OrderConsumer {
     @KafkaListener(topics = "${spring.kafka.create-order-topic.name}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void consume(OrderEvent orderEvent) {
-        LOGGER.info("Received OrderEvent: {}", orderEvent);
+        try {
+            LOGGER.info("Received OrderEvent: {}", orderEvent);
 
-        OrderDTO orderDTO = orderEvent.getOrderDTO();
-        Set<Long> variantIds = orderDTO.getOrderItems().stream()
-                .map(OrderItemDTO::getVariantId)
-                .collect(Collectors.toSet());
+            OrderDTO orderDTO = orderEvent.getOrderDTO();
+            if (orderDTO == null || orderDTO.getOrderItems() == null || orderDTO.getOrderItems().isEmpty()) {
+                LOGGER.warn("Invalid OrderEvent received: orderId={}", orderDTO != null ? orderDTO.getOrderId() : "null");
+                return;
+            }
 
-        // Lấy danh sách các ProductVariant theo variantIds
-        Map<Long, ProductVariant> variantMap = productVariantService.getProductVariantByIds(variantIds).stream()
-                .collect(Collectors.toMap(ProductVariant::getId, variant -> variant));
+            Set<Long> variantIds = orderDTO.getOrderItems().stream()
+                    .map(OrderItemDTO::getVariantId)
+                    .collect(Collectors.toSet());
 
-        // Cập nhật tồn kho sản phẩm
-        for (OrderItemDTO orderItem : orderDTO.getOrderItems()) {
-            updateStockForVariant(orderItem, variantMap);
+            Map<Long, ProductVariant> variantMap = productVariantService.getProductVariantByIds(variantIds).stream()
+                    .collect(Collectors.toMap(ProductVariant::getId, variant -> variant));
+
+            for (OrderItemDTO orderItem : orderDTO.getOrderItems()) {
+                updateStockForVariant(orderItem, variantMap);
+            }
+
+            LOGGER.info("Successfully processed OrderEvent for orderId: {}", orderDTO.getOrderId());
+        } catch (InsufficientStockException e) {
+            LOGGER.error("Insufficient stock error for orderId: {}", orderEvent.getOrderDTO().getOrderId(), e);
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Error processing OrderEvent for orderId: {}, Error: {}",
+                    orderEvent.getOrderDTO() != null ? orderEvent.getOrderDTO().getOrderId() : "unknown",
+                    e.getMessage(), e);
+            throw new RuntimeException("Failed to process OrderEvent", e);
         }
-
-        LOGGER.info("Successfully processed OrderEvent for orderId: {}", orderDTO.getOrderId());
     }
 
     private void updateStockForVariant(OrderItemDTO orderItem, Map<Long, ProductVariant> variantMap) {

@@ -24,24 +24,19 @@ public class CloudinaryService {
     @Async
     public void uploadFile(MultipartFile file, String publicId) {
         try {
-            // Đọc ảnh từ MultipartFile thành BufferedImage
             BufferedImage originalImage = ImageIO.read(file.getInputStream());
 
-            // Resize ảnh, ví dụ resize width về 800px (giữ nguyên tỷ lệ)
             BufferedImage resizedImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.AUTOMATIC, 800);
 
-            // Chuyển ảnh resized thành byte[]
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(resizedImage, "jpg", outputStream);
             byte[] resizedBytes = outputStream.toByteArray();
 
-            // Upload ảnh đã resize lên Cloudinary
             Map uploadResult = cloudinary.uploader().upload(resizedBytes, ObjectUtils.asMap(
                     "public_id", publicId,
-                    "quality", "auto:good" // Sử dụng nén tự động với chất lượng tốt
+                    "quality", "auto:good"
             ));
 
-            // Tạo URL mà không chứa version để tiện lợi
             String url = cloudinary.url().generate(uploadResult.get("public_id").toString());
 
             log.info("Uploaded file URL: {}", url);
