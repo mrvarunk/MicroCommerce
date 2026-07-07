@@ -5,7 +5,7 @@ spring:
     active: dev
   kafka:
     producer:
-      bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
@@ -25,7 +25,7 @@ spring:
     sampler:
       probability: 1
   redis:
-    host: ${SPRING_REDIS_HOST:localhost}
+    host: ${SPRING_REDIS_HOST:redis}
     port: ${SPRING_REDIS_PORT:6379}
     timeout: ${SPRING_REDIS_TIMEOUT:60000}
   servlet:
@@ -33,7 +33,7 @@ spring:
       max-file-size: 2MB
       max-request-size: 15MB
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3310/product_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql-product:3306/product_db}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:root}
   jpa:
@@ -46,10 +46,6 @@ spring:
 server:
   port: 8084
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
 
 management:
   endpoints:
