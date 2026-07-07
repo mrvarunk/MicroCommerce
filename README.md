@@ -1,461 +1,569 @@
-# E-commerce Backend Microservices Project (Dockerized) 🚀
+# E-Commerce Microservices Platform
 
-## Introduction 🌟
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.3-green)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17-blue)](https://openjdk.java.net/)
+[![Docker](https://img.shields.io/badge/Docker-Latest-blue)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-blue)](https://kubernetes.io/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-Welcome to the **E-commerce Backend Microservices Project**! This project utilizes a microservices architecture to provide a flexible and maintainable e-commerce platform. By using Docker and Docker Compose, developers can easily set up and manage the entire backend ecosystem, including services such as API Gateway, Service Registry (Eureka Server), Product, Order, Email, Identity, and Payment. Modern technologies like Kafka for messaging, OpenFeign for inter-service communication, Redis for temporary data storage, Zipkin for tracing, and MySQL for data storage create a powerful and efficient system.
+A production-style Spring Boot microservices platform demonstrating cloud-native architecture, distributed systems patterns, and concurrent integration testing at scale.
 
-## Microservices Architecture 🛠️
+## Project Overview
 
-The project is divided into several interconnected microservices, each handling specific business functions. Below is an overview of each service:
+This is a **microservices-based e-commerce platform** built with Spring Boot, showcasing enterprise-grade patterns for distributed systems. The project demonstrates:
 
-### 1. API Gateway 🌐
+- **Distributed locking** using Redis to prevent overselling across multiple Kubernetes replicas
+- **Concurrent testing** with 50+ simultaneous HTTP requests using JUnit 5 and advanced thread synchronization
+- **Event-driven architecture** using Apache Kafka for asynchronous service communication
+- **Service discovery** with Spring Cloud Eureka
+- **API gateway** routing with Spring Cloud Gateway
+- **Cloud-native deployment** on Kubernetes with Docker containerization
 
-- **Description**: The single entry point for all client requests, routing them to the appropriate microservices.
-- **Technology**: Spring Cloud Gateway
-- **Features**: Security handling, routing, load balancing, and rate limiting.
+---
 
-### 2. Service Registry 📜
+## Features
 
-- **Description**: Supports dynamic discovery and registration of microservices within the ecosystem.
-- **Technology**: Eureka Server (Spring Cloud Netflix)
-- **Features**: Service discovery, registration management, and health monitoring.
+✨ **Core Architecture**
+- Spring Boot Microservices (8 services)
+- Spring Cloud Gateway with routing and load balancing
+- Eureka Server for service discovery
+- OpenFeign for inter-service REST communication
 
-### 3. Product Service 🛒
+🔄 **Event Processing**
+- Apache Kafka for event-driven messaging
+- Kafka producers and consumers across services
+- Asynchronous order processing and notifications
 
-- **Description**: Manages the product catalog, including product details and inventory.
-- **Technology**: Spring Boot, MySQL, Redis
-- **Features**: CRUD operations for product data, inventory management, product caching.
+🔒 **Data & Caching**
+- MySQL for persistent data storage
+- Redis for caching and distributed locking (Redisson)
+- Automatic cache invalidation
 
-### 4. Order Service 🧾
+⚙️ **DevOps & Deployment**
+- Docker containerization for all services
+- Docker Compose for local orchestration
+- Kubernetes deployment with multiple replicas
+- ConfigMaps and Secrets support
 
-- **Description**: Oversees order processing, tracking, and history for users.
-- **Technology**: Spring Boot, MySQL, Zipkin
-- **Features**: Order creation, processing, status tracking, history management, tracing.
+🧪 **Testing & Quality**
+- JUnit 5 integration tests (concurrent load testing)
+- CountDownLatch synchronization without Thread.sleep()
+- ExecutorService for thread pool management
+- AtomicInteger for thread-safe counters
+- 50+ concurrent requests validation
 
-### 5. Email Service 📧
+---
 
-- **Description**: Manages sending email notifications for order confirmations, password resets, and other user communications.
-- **Technology**: Spring Boot, MySQL
-- **Features**: Sending emails, email templates, email scheduling, and delivery status tracking.
+## Architecture
 
-### 6. Identity Service 🧑‍💻
-
-- **Description**: Handles user authentication, authorization, and identity management.
-- **Technology**: Spring Boot, MySQL, Redis
-- **Features**: User registration, login, role management, authentication tokens, session storage.
-
-### 7. Payment Service 💳
-
-- **Description**: Manages payment processing, transactions, and invoices.
-- **Technology**: Spring Boot, MySQL, Zipkin
-- **Features**: Payment processing, transaction history, invoice management, tracing.
-
-## Technologies Used 🔧
-
-- **Spring Boot**: The main framework for developing microservices.
-- **Apache Kafka**: Supports inter-service communication via asynchronous messaging.
-- **OpenFeign**: Simplifies HTTP calls between microservices with declarative REST clients.
-- **MySQL**: Relational database management system for storing service-specific data.
-- **Redis**: Temporary data storage and caching for high performance.
-- **Zipkin**: Distributed tracing tool for monitoring and debugging microservices.
-- **Spring Cloud**: Provides tools for managing a distributed system (Eureka, Gateway, etc.).
-- **Docker**: Containerizes each microservice to ensure consistent and isolated environments.
-- **Docker Compose**: Coordinates multi-container Docker applications, managing service dependencies and networking.
-
-## Project Setup 🛠️
-
-### 🛠️ **Requirements**
-
-Ensure you have the following installed on your development machine:
-
-- **Docker**: [Install Docker](https://docs.docker.com/get-docker/)
-- **Docker Compose**: [Install Docker Compose](https://docs.docker.com/compose/install/)
-- **Git**: To clone the repository.
-- **Web Browser**: To access service dashboards and APIs.
-
-### 🚀 **Clone Repository**
-
-```bash
-git clone https://github.com/haphong463/springboot-kafka-microservices.git
-cd springboot-kafka-microservices
-```
-
-### 🐳 Run Microservices with Docker Compose
-
-The project uses Docker Compose to manage all microservices and their dependencies. Follow these steps to boot up the system:
-
-#### Ensure Docker and Docker Compose are Running
-
-Make sure Docker Desktop (or Docker Engine) is running on your machine.
-
-#### Build and Start All Services
-
-From the project's root directory, execute:
-
-```bash
-docker-compose up -d
-```
-
-**Flag:**
-- `-d`: Run containers in detached mode.
-
-#### Check All Services are Running
-
-Check the status of all running containers:
-
-```bash
-docker-compose ps
-```
-
-**Expected Result:**
+### System Architecture
 
 ```
-    Name                      Command               State               Ports
---------------------------------------------------------------------------------------------
-api-gateway            java -jar /app.jar            Up      0.0.0.0:9191->9191/tcp
-eureka-server          java -jar /app.jar            Up      0.0.0.0:8761->8761/tcp
-identity-service       java -jar /app.jar            Up      0.0.0.0:9898->9898/tcp
-kafka                  /etc/confluent/docker/run     Up      0.0.0.0:9092->9092/tcp, 0.0.0.0:29092->29092/tcp
-mysql-order-service    docker-entrypoint.sh mysqld   Up      0.0.0.0:3307->3306/tcp
-mysql-identity-service docker-entrypoint.sh mysqld   Up      0.0.0.0:3308->3306/tcp
-mysql-payment-service  docker-entrypoint.sh mysqld   Up      0.0.0.0:3309->3306/tcp
-mysql-product-service  docker-entrypoint.sh mysqld   Up      0.0.0.0:3310->3306/tcp
-redis                  docker-entrypoint.sh redis    Up      0.0.0.0:6379->6379/tcp
-zipkin                 start-zipkin                  Up      0.0.0.0:9411->9411/tcp
-order-service          java -jar /app.jar            Up      0.0.0.0:8080->8080/tcp
-payment-service        java -jar /app.jar            Up      0.0.0.0:8085->8085/tcp
-product-service        java -jar /app.jar            Up      0.0.0.0:8084->8084/tcp
-email-service          java -jar /app.jar            Up      0.0.0.0:8081->8081/tcp
-zookeeper              /etc/confluent/docker/run     Up      0.0.0.0:2181->2181/tcp
+┌─────────────────────────────────────────────────────────────────┐
+│                        Client Application                       │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                    Port 9191 (NodePort)
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     API Gateway                                  │
+│                  (Spring Cloud Gateway)                          │
+└────────────────────────────┬────────────────────────────────────┘
+         ┌──────────────────┼──────────────────┐
+         ▼                  ▼                  ▼
+    ┌─────────┐        ┌──────────┐      ┌──────────┐
+    │ Product │        │  Order   │      │ Identity │
+    │ Service │        │ Service  │      │ Service  │
+    └────┬────┘        └────┬─────┘      └────┬─────┘
+         │                  │                  │
+         └──────────────────┼──────────────────┘
+                  ┌─────────┼─────────┐
+                  ▼         ▼         ▼
+            ┌──────────────────────────┐
+            │   Eureka Service         │
+            │   Registry (Port 8761)   │
+            └──────────────────────────┘
 ```
 
-### 🛠️ Service Configuration
+### Stock Service Kubernetes Architecture
 
-All configurations are managed via environment variables defined in the `docker-compose.yml` file. However, if you need to customize configurations, you can edit the `application-docker.properties` or `application.yml` files in each microservice.
+```
+┌────────────────────────────────────────────────────────────────┐
+│                    Kubernetes Cluster                          │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │              Stock Service (Deployment)                 │ │
+│  │                 Replicas: 2                             │ │
+│  │  ┌──────────────────┐      ┌──────────────────────┐   │ │
+│  │  │  Stock Service   │      │  Stock Service       │   │ │
+│  │  │    Pod 1         │      │    Pod 2             │   │ │
+│  │  │ (Port 8080)      │      │ (Port 8080)          │   │ │
+│  │  └────────┬─────────┘      └─────────┬────────────┘   │ │
+│  │           │                          │                │ │
+│  │           └──────────────┬───────────┘                │ │
+│  │                          │                           │ │
+│  └──────────────────────────┼───────────────────────────┘ │
+│                             │                              │
+│  ┌──────────────────────────▼──────────────────────────┐  │
+│  │         Stock Service NodePort Service             │  │
+│  │         (Port 30081 → 8080)                        │  │
+│  └────────────────────────────────────────────────────┘  │
+│                                                           │
+│  ┌──────────────────────┐    ┌──────────────────────┐    │
+│  │      Redis           │    │      MySQL           │    │
+│  │   (Distributed Lock) │    │   (Stock Database)   │    │
+│  └──────────────────────┘    └──────────────────────┘    │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+```
 
-#### Example: Configuring order-service in docker-compose.yml
+---
+
+## Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| **Backend** | Spring Boot 3.3.3, Spring Cloud, Spring Data JPA, Spring Cloud Gateway |
+| **Database** | MySQL 8.0, Redis 7.0 (Redisson for distributed locks) |
+| **Messaging** | Apache Kafka, Zookeeper |
+| **Communication** | OpenFeign, REST APIs |
+| **Service Discovery** | Eureka Server (Spring Cloud Netflix) |
+| **Monitoring** | Zipkin (distributed tracing) |
+| **DevOps** | Docker, Docker Compose, Kubernetes |
+| **Testing** | JUnit 5, Spring Boot Test, Awaitility |
+| **Java** | JDK 17, Maven |
+
+---
+
+## Microservices
+
+| Service | Port | Purpose | Tech Stack |
+|---------|------|---------|-----------|
+| API Gateway | 9191 | Request routing, load balancing | Spring Cloud Gateway |
+| Eureka Server | 8761 | Service discovery & registration | Spring Cloud Netflix |
+| Product Service | 8084 | Product catalog & inventory | Spring Boot, MySQL, Redis |
+| Order Service | 8080 | Order processing & tracking | Spring Boot, MySQL, Kafka |
+| Email Service | 8081 | Email notifications | Spring Boot, MySQL |
+| Identity Service | 9898 | Authentication & authorization | Spring Boot, MySQL, Redis |
+| Payment Service | 8085 | Payment processing | Spring Boot, MySQL, Zipkin |
+| **Stock Service** | 8082 | Inventory with distributed locking | Spring Boot, MySQL, Redis, **JUnit 5 Tests** |
+
+---
+
+## Distributed Locking (Redis)
+
+### The Overselling Problem
+
+Without distributed locking, multiple concurrent requests can create race conditions:
+
+```
+Initial Stock = 5
+
+Request 1: Read stock (5) → Check OK → Sleep...
+Request 2: Read stock (5) → Check OK → Sleep...
+...
+Request 5: Read stock (5) → Check OK → Decrease to 4
+Request 1: Decreases to 4 (WRONG! Should be checked again)
+
+Result: Final stock = Negative (OVERSOLD)
+```
+
+### Redis Distributed Lock Solution
+
+Using Redisson (Redis client for Java):
+
+```java
+String lockKey = "lock:product:" + productId;
+RLock lock = redissonClient.getLock(lockKey);
+
+try {
+    lock.tryLock(5, 10, TimeUnit.SECONDS);  // Acquire lock
+    // Only ONE request can execute here
+    Stock current = stockRepository.findByProductId(productId);
+    if (current.getQuantity() >= quantity) {
+        current.setQuantity(current.getQuantity() - quantity);
+        stockRepository.save(current);
+    }
+} finally {
+    lock.unlock();  // Release lock
+}
+```
+
+### Why Kubernetes Needs Distributed Locks
+
+```
+Kubernetes Cluster with 2 Stock Service Replicas:
+
+  Pod 1                  Pod 2
+  ┌────────────┐        ┌────────────┐
+  │ Instance 1 │        │ Instance 2 │
+  │ (Memory)   │        │ (Memory)   │
+  └────────────┘        └────────────┘
+       │                      │
+       └──────────┬───────────┘
+                  │
+              Redis Lock
+          (Shared across all pods)
+
+Without Redis: Each pod has its own cache → Race conditions
+With Redis: Single source of truth → No overselling
+```
+
+---
+
+## Kubernetes Deployment
+
+### Deployment Manifest
 
 ```yaml
-order-service:
-  image: springboot-kafka-microservices/order-service:latest
-  container_name: order-service
-  depends_on:
-    - kafka
-    - mysql-order-service
-    - eureka-server
-    - zipkin
+# stock-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-service
+spec:
+  replicas: 2  # Multiple instances
+  selector:
+    matchLabels:
+      app: stock-service
+  template:
+    metadata:
+      labels:
+        app: stock-service
+    spec:
+      containers:
+      - name: stock-service
+        image: stock-service:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: stock-config
+              key: db-url
+```
+
+### Service Manifest (NodePort)
+
+```yaml
+# stock-service-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: stock-service
+spec:
+  type: NodePort
   ports:
-    - "8080:8080"
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql-order-service:3306/order_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: root
-    SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-    SPRING_ZIPKIN_BASE_URL: http://zipkin:9411/
-    SPRING_PROFILES_ACTIVE: docker
-  networks:
-    - shop-network
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30081
+  selector:
+    app: stock-service
 ```
 
-- **SPRING_DATASOURCE_URL**: Connects to the `mysql-order-service` database.
-- **SPRING_KAFKA_BOOTSTRAP_SERVERS**: Specifies the Kafka broker within Docker.
-- **EUREKA_CLIENT_SERVICEURL_DEFAULTZONE**: Registers with the Eureka Server.
-- **SPRING_ZIPKIN_BASE_URL**: Configures Zipkin for tracing.
-
-## API Endpoints and Testing 🔍
-
-### 🛠️ Accessing Services
-
-- **Eureka Server Dashboard**: [http://localhost:8761](http://localhost:8761)
-  - Monitor registered services and their statuses.
-
-- **API Gateway**: [http://localhost:9191](http://localhost:9191)
-  - The entry point for all API requests.
-
-- **Zipkin Tracing UI**: [http://localhost:9411](http://localhost:9411)
-  - Interface for monitoring and analyzing service tracing.
-
-- **Order Service**: [http://localhost:8080](http://localhost:8080)
-
-- **Payment Service**: [http://localhost:8085](http://localhost:8085)
-
-- **Product Service**: [http://localhost:8084](http://localhost:8084)
-
-- **Email Service**: [http://localhost:8081](http://localhost:8081)
-
-- **Identity Service**: [http://localhost:9898](http://localhost:9898)
-
-### 🛠️ Testing APIs
-
-Use tools like Postman, Insomnia, or cURL to interact with the APIs. Below are examples of how to perform basic operations, considering the required role for each operation and using cookies for authentication:
-
-### 🛠️ User Registration and Authentication
-
-Below are the steps and examples for registering a new user and obtaining authentication tokens using cookies.
-
-#### 🔐 User Registration
-
-To register a new user, provide their name, password, email, and roles. Roles should be specified as an array and can include roles like `CUSTOMER`, `EMPLOYEE`, etc.
-
-**Endpoint**: `POST http://localhost:9191/api/v1/auth/register`
+### Deployment Commands
 
 ```bash
-curl -X POST http://localhost:9191/api/v1/auth/register \
-     -H "Content-Type: application/json" \
-     -d '{
-           "name": "johndoe",
-           "password": "securepassword",
-           "email": "john.doe@example.com",
-           "roles": ["CUSTOMER"]
-         }'
+# Apply deployment
+kubectl apply -f stock-service-deployment.yaml
+
+# Apply service
+kubectl apply -f stock-service-service.yaml
+
+# Verify deployment
+kubectl get deployments
+kubectl get pods
+kubectl get svc
+
+# Scale replicas
+kubectl scale deployment stock-service --replicas=3
+
+# View logs
+kubectl logs -f deployment/stock-service
+
+# Port forward (testing)
+kubectl port-forward svc/stock-service 8080:8080
 ```
 
-#### 🔑 Authentication (Login)
+---
 
-To log in and receive a session cookie, submit your username and password to the authentication endpoint. The server will return a cookie containing your session ID if the login is successful.
+## Concurrent Integration Testing
 
-**Endpoint**: `POST http://localhost:9191/api/v1/auth/token`
+### Why We Replaced Python Stress Test
+
+**Before:** Python `stress_test.py` (simple load generation, no assertions)
+**Now:** JUnit 5 integration tests (50 concurrent requests, full validation)
+
+### Test Mechanism
+
+```
+Test Setup:
+├─ Create ExecutorService with 10 threads
+├─ Create CountDownLatch(1) for release signal
+├─ Create CountDownLatch(50) for completion tracking
+└─ Create AtomicInteger counters for results
+
+Test Execution:
+├─ Submit 50 tasks to executor
+├─ All tasks block on startSignal.await()
+├─ Release all threads simultaneously (startSignal.countDown())
+├─ Each task makes HTTP POST to /api/v1/stock/decrease
+├─ Increment success/failure counters
+├─ Wait for completion (doneSignal.await())
+
+Test Validation:
+├─ Assert successCount == 5
+├─ Assert failureCount == 45
+└─ Assert finalStock == 0 (no overselling)
+```
+
+### Running Tests
 
 ```bash
-curl -X POST http://localhost:9191/api/v1/auth/token \
-     -H "Content-Type: application/json" \
-     -d '{
-           "username": "johndoe",
-           "password": "securepassword"
-         }'
+cd stock-service
+
+# Run all tests
+mvn clean test
+
+# Run specific test
+mvn test -Dtest=StockConcurrencyIntegrationTest
+
+# Run main concurrent test
+mvn test -Dtest=StockConcurrencyIntegrationTest#testConcurrentStockDecrementWithDistributedLock
+
+# Verbose output
+mvn test -X
 ```
 
-Use the session cookie stored in `cookies.txt` for subsequent requests that require authentication. This setup ensures secure handling of user sessions and simplifies credential management across multiple requests.
+### Test Scenario
 
-#### 📦 Example of Product Service
+| Parameter | Value |
+|-----------|-------|
+| Initial Stock | 5 units |
+| Concurrent Requests | 50 |
+| Thread Pool | 10 threads |
+| Request Type | POST /api/v1/stock/decrease?productId=9999&quantity=1 |
+| Expected Successful | 5 (only available stock) |
+| Expected Failed | 45 (insufficient stock, 400 response) |
+| Final Stock | 0 (no overselling) |
+| Execution Time | ~8-10 seconds |
 
-**Add New Product (Role Required: EMPLOYEE)**
+---
 
-To perform this operation, your user must be authenticated as an employee. Ensure your cookie with authentication details is included in the request.
+## Running the Project
+
+### Prerequisites
 
 ```bash
-curl -X POST http://localhost:9191/api/v1/products \
-     -H "Content-Type: application/json" \
-     -b "token=your_jwt_token" \
-     -d '{
-           "name": "New Product",
-           "imageUrl": "image1.png",
-           "description": "Product description",
-           "price": 99.99,
-           "stockQuantity": 100
-         }'
+# Docker & Docker Compose
+docker --version
+docker-compose --version
+
+# Java 17+
+java -version
+
+# Maven
+mvn --version
+
+# Kubernetes (for K8s deployment)
+kubectl version
 ```
 
-#### 🧾 Example of Order Service
-
-**Create New Order (Role Required: CUSTOMER)**
-
-To perform this operation, your user must be authenticated as a customer. Ensure your cookie with authentication details is included in the request.
+### Docker Compose (Local Development)
 
 ```bash
-curl -X POST http://localhost:9191/api/v1/order \
-     -H "Content-Type: application/json" \
-     -b "token=your_jwt_token" \
-     -d '{
-            "orderItems": [
-                {
-                    "productId": "02f6f017-816d-419f-a680-26f814be70e5",
-                    "quantity": 1
-                }
-            ],
-            "paymentMethod": "COD"
-         }'
+# Clone repository
+git clone https://github.com/your-org/microservices.git
+cd springboot-kafka-microservices
+
+# Build and start all services
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f stock-service
+
+# Stop services
+docker-compose down
 ```
 
-## Database Management 🗃️
-
-Each microservice has a separate MySQL database to ensure data isolation and integrity. Here's how you can manage them:
-
-### 🐳 Accessing MySQL Databases via Docker
-
-#### From Host Using MySQL Client
-
-You can connect to any MySQL database using the host ports mapped in `docker-compose.yml`.
-
-**Example: Connect to `order_db`**
+### Maven Build
 
 ```bash
-mysql -h 127.0.0.1 -P 3307 -u root -p
+cd stock-service
+
+# Build JAR
+mvn clean package -DskipTests
+
+# Build with tests
+mvn clean package
+
+# Run locally
+mvn spring-boot:run
 ```
 
-- **Host**: `127.0.0.1`
-- **Port**: `3307` (mapped to container port `3306`)
-- **Username**: `root`
-- **Password**: `root`
-
-#### From Inside the Docker Network
-
-Services can communicate with each other using service names and internal ports.
-
-**Example: Access `order_db` from `order-service`**
+### Kubernetes Deployment
 
 ```bash
-mysql -h mysql-order-service -P 3306 -u root -p
+# Create namespace
+kubectl create namespace ecommerce
+
+# Deploy services
+kubectl apply -f k8s/ -n ecommerce
+
+# Verify deployment
+kubectl get all -n ecommerce
+
+# Access service
+curl http://localhost:30081/api/v1/stock/1001
 ```
 
-### 🐳 Using Docker Exec to Access MySQL Inside Container
+---
 
-**Enter MySQL Container**
+## API Examples
+
+### Initialize Stock
 
 ```bash
-docker exec -it mysql-order-service bash
+curl -X POST "http://localhost:8082/api/v1/stock/init?productId=1001&quantity=100"
 ```
 
-**Connect to MySQL**
+**Response:** `200 OK - Stock initialized successfully.`
+
+### Get Stock
 
 ```bash
-mysql -u root -proot order_db
+curl -X GET "http://localhost:8082/api/v1/stock/1001"
 ```
 
-- **Username**: `root`
-- **Password**: `root`
-- **Database**: `order_db`
-
-**Add Record to Role Table**
-
-```sql
-CREATE TABLE IF NOT EXISTS roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
-
-INSERT INTO roles (name) VALUES ('EMPLOYEE'), ('ADMINISTRATOR'), ('CUSTOMER');
+**Response:**
+```json
+{
+  "id": 1,
+  "productId": 1001,
+  "quantity": 100
+}
 ```
 
-**Check Records Have Been Successfully Added**
-
-```sql
-SELECT * FROM roles;
-```
-
-**Expected Result:**
-
-```
-+----+---------------+
-| id | name          |
-+----+---------------+
-|  1 | EMPLOYEE      |
-|  2 | ADMINISTRATOR |
-|  3 | CUSTOMER      |
-+----+---------------+
-```
-
-**Exit MySQL and Container**
+### Decrease Stock
 
 ```bash
-EXIT;
-exit
+curl -X POST "http://localhost:8082/api/v1/stock/decrease?productId=1001&quantity=5"
 ```
 
-## Troubleshooting 🛠️
+**Response (Success):** `200 OK - Stock decreased successfully.`
+**Response (Failure):** `400 Bad Request - Insufficient stock! Remaining: 2`
 
-### ❗ Common Issues and Solutions
+---
 
-#### Eureka Server Not Registering Services
+## Project Structure
 
-- **Issue**: Services not appearing on Eureka Dashboard.
-- **Solution**:
-  - Ensure the environment variable `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE` is set correctly as `http://eureka-server:8761/eureka/` in `docker-compose.yml`.
-  - Check network connectivity between services.
-  - Check logs of both the service and Eureka Server for registration errors.
-
-#### Kafka Listener Port Conflict
-
-- **Issue**: `java.lang.IllegalArgumentException: requirement failed: Each listener must have a different port`
-- **Solution**:
-  - Update `KAFKA_ADVERTISED_LISTENERS` to use different ports for each listener in `docker-compose.yml`.
-
-  **Example:**
-
-  ```yaml
-  KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-  ```
-
-#### MySQL Volume Not Defined
-
-- **Issue**: Service "mysql-product-service" refers to undefined volume `mysql-product-service-data`
-- **Solution**:
-  - Define all necessary volumes in the `volumes` section of `docker-compose.yml`.
-
-  ```yaml
-  volumes:
-    mysql-order-service-data:
-    mysql-identity-service-data:
-    mysql-payment-service-data:
-    mysql-product-service-data:
-  ```
-
-#### Service Not Starting
-
-- **Issue**: Service containers crashing or not starting.
-- **Solution**:
-  - Check logs of the specific service:
-
-    ```bash
-    docker-compose logs -f <service-name>
-    ```
-  - Ensure environment variables are set correctly.
-  - Check database connections and login details.
-
-#### Port Conflict on Host
-
-- **Issue**: Host ports being used by another service.
-- **Solution**:
-  - Change host port mappings in `docker-compose.yml` to unused ports.
-
-  **Example:**
-
-  ```yaml
-  ports:
-    - "3306:3306"    # Change to "3312:3306" if 3306 is being used
-  ```
-
-### 🔍 Checking Logs
-
-Use Docker Compose to view logs of any service:
-
-```bash
-docker-compose logs -f <service-name>
+```
+springboot-kafka-microservices/
+├── api-gateway/              # Spring Cloud Gateway (Port 9191)
+├── service-registry/         # Eureka Server (Port 8761)
+├── product-service/          # Product management
+├── order-service/            # Order processing
+├── email-service/            # Email notifications
+├── identity-service/         # Authentication
+├── payment-service/          # Payment processing
+├── stock-service/            # Inventory with distributed locking
+│   ├── src/main/java/        # Application code
+│   ├── src/test/java/        # JUnit 5 integration tests
+│   ├── pom.xml              # Maven configuration
+│   ├── Dockerfile           # Container image
+│   └── QUICKSTART.md         # Test documentation
+├── docker-compose.yml        # Local orchestration
+├── k8s/                      # Kubernetes manifests
+└── README.md                 # This file
 ```
 
-**Example: View Logs of `eureka-server`**
+---
 
-```bash
-docker-compose logs -f eureka-server
-```
+## Future Improvements
 
-### 🐳 Rebuilding Containers
+### Scalability
+- [ ] Horizontal Pod Autoscaler (HPA) based on CPU/Memory
+- [ ] Event streaming with multiple Kafka topics per domain
+- [ ] Caching layer optimization
 
-If you make changes to the code or configurations, rebuild and restart the affected services:
+### Observability
+- [ ] Prometheus metrics and monitoring dashboards
+- [ ] Grafana dashboards for visualization
+- [ ] ELK Stack (Elasticsearch, Logstash, Kibana) for centralized logging
+- [ ] Improved distributed tracing with Jaeger
 
-```bash
-docker-compose up -d --build <service-name>
-```
+### DevOps
+- [ ] Helm Charts for standardized K8s deployments
+- [ ] GitHub Actions CI/CD pipeline
+- [ ] ArgoCD for GitOps deployments
+- [ ] Istio service mesh for traffic management
 
-**Example: Rebuild and Restart `order-service`**
+### Testing
+- [ ] Performance benchmarking with JMeter
+- [ ] Chaos engineering tests
+- [ ] Contract testing with Pact
+- [ ] Security scanning in CI/CD
 
-```bash
-docker-compose up -d --build order-service
-```
+---
 
-## Useful Documentation 📚
+## Resume Highlights
+
+This project demonstrates mastery of:
+
+🏗️ **Microservices Architecture**
+- Service decomposition and boundaries
+- Inter-service communication (REST, Kafka)
+- Service discovery with Eureka
+
+🔄 **Distributed Systems**
+- Distributed locking with Redis to prevent race conditions
+- Handling eventual consistency
+- Coordinating state across services
+
+⚙️ **Concurrency**
+- ExecutorService thread pools
+- CountDownLatch for thread synchronization
+- AtomicInteger for thread-safe counters
+- No blocking delays (Thread.sleep() free)
+
+☁️ **Cloud-Native**
+- Kubernetes deployments with multiple replicas
+- Docker containerization
+- Configuration management (ConfigMaps)
+- Service scaling and health checks
+
+🧪 **Production Testing**
+- JUnit 5 integration tests
+- Concurrent load testing (50+ simultaneous requests)
+- Comprehensive test assertions
+- Test isolation and repeatability
+
+🔒 **Enterprise Patterns**
+- API Gateway routing and rate limiting
+- Event-driven architecture (Kafka)
+- Authentication and authorization
+- Distributed tracing
+
+---
+
+## Resources
 
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Spring Cloud Documentation](https://spring.io/projects/spring-cloud)
-- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
-- [Redis Documentation](https://redis.io/documentation)
-- [Zipkin Documentation](https://zipkin.io/pages/documentation.html)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Redis Redisson](https://redisson.org/)
+- [Apache Kafka](https://kafka.apache.org/)
 - [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [Eureka Server Documentation](https://cloud.spring.io/spring-cloud-netflix/multi/multi__service_discovery_eureka_clients.html)
-- [Spring Cloud Gateway Documentation](https://spring.io/projects/spring-cloud-gateway)
 
-## License 📝
+## License
 
-This project is licensed under the MIT License.
+MIT License - See LICENSE file for details
+
+---
+
+**Status:** Production-Ready | **Last Updated:** July 2026
