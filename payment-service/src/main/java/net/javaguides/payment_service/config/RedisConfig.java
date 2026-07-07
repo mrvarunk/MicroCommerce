@@ -13,17 +13,30 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @EnableRedisRepositories
 public class RedisConfig {
-    @Value("${spring.redis.host}")
+    
+    @Value("${spring.redis.host:localhost}")
     private String redisHost;
 
-    @Value("${spring.redis.port}")
+    @Value("${spring.redis.port:6379}")
     private int redisPort;
+    
+    @Value("${spring.redis.password:}")
+    private String redisPassword;
+    
+    @Value("${spring.redis.timeout:60000}")
+    private long redisTimeout;
 
     @Bean
     public JedisConnectionFactory connectionFactory(){
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setPort(redisPort);
         configuration.setHostName(redisHost);
+        configuration.setPort(redisPort);
+        
+        // Set password if provided (non-empty)
+        if (redisPassword != null && !redisPassword.isEmpty()) {
+            configuration.setPassword(redisPassword);
+        }
+        
         return new JedisConnectionFactory(configuration);
     }
 
@@ -31,12 +44,19 @@ public class RedisConfig {
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory());
+        
+        // Key serialization
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer()); // Using JSON serialization
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer()); // Using JSON serialization
+        
+        // Value serialization using JSON
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        
+        // Enable transaction support
         template.setEnableTransactionSupport(true);
         template.afterPropertiesSet();
+        
         return template;
     }
 
